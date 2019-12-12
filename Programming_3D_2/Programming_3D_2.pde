@@ -19,12 +19,14 @@ color pink            = #df2080;
 color black           = #000000;
 color grey            = #808080;
 color white           = #ffffff;
+color snowColor       = #c6ddec;
+color skyColor        = #6c8393;
 
 //Textures
 PImage block, square;
 
 //Map
-PImage map, image;
+PImage map, pokemon;
 
 //Other
 final int BS = 20;
@@ -44,7 +46,10 @@ int bulletSpawnTimer = 30;
 
 //Firework
 ArrayList<Firework> fireworkList;
-int fsTimer = 120;
+int fireworkSpwanTimer = 120;
+
+//Snow
+ArrayList<Snow> snowList;
 //--------------------------------------------------------------------------------------------
 void setup() {
   size(800, 600, P3D);
@@ -53,7 +58,7 @@ void setup() {
   map = loadImage("Map.png");
 
   //Pixel Art Images
-  image = loadImage("Snore.png");
+  pokemon = loadImage("Snore.png");
 
   //Textures
   block  = loadImage("Block.png");
@@ -65,14 +70,17 @@ void setup() {
 
   //Firework
   fireworkList = new ArrayList<Firework>();
+
+  //Snow
+  snowList = new ArrayList<Snow>();
 }//----------------------------------------------------------------------------------------------------------------
 
 void draw() {
-  background(255);
+  background(black);
   noStroke();
   colorMode(HSB);
 
-  camera(lx, ly, lz, directionX.x+lx, ly+0, directionX.y+lz, 0, 1, 0);
+  camera(lx, directionY.x+ly, lz, directionX.x+lx, directionY.y+ly, directionX.y+lz, 0, 1, 0);
   //camera(locX, locY, locZ, dirX, dirY, dirZ, tiltX, tiltY, tiltZ)
 
   //Moves camera with mouse
@@ -83,7 +91,7 @@ void draw() {
 
   //Sets speed
   directionX.setMag(BS/4);
-  directionY.setMag(BS/4);
+  directionY.setMag(BS/8);
 
   //Stafe direction is for left and right movement
   strafeDirection = directionX.copy();
@@ -114,6 +122,7 @@ void draw() {
 
   bulletStuff();
   fireworkStuff();
+  snowStuff();
 }//----------------------------------------------------------------------------------------------------------------
 
 void drawMap() {
@@ -141,8 +150,8 @@ void drawMap() {
   //int mapX = 0, mapY = 0;
   //int worldX = BS, worldY = BS/2, worldZ = BS;
   ////0. Looking through all the pixels in the map
-  //while (mapY < image.height) {
-  //  color pixel = image.get(mapX, mapY);
+  //while (mapY < pokemon.height) {
+  //  color pixel = pokemon.get(mapX, mapY);
   //  if (pixel != white) {
   //  worldX = mapX * BS;
   //  worldZ = mapY * BS;
@@ -150,7 +159,7 @@ void drawMap() {
   //  }
   //  mapX++;
   //  //1. If you get to the end of the row, move down one pixel
-  //  if (image.width-1 < mapX) {
+  //  if (pokemon.width-1 < mapX) {
   //    mapX = 0;
   //    mapY++;
   //  }//1.
@@ -167,6 +176,13 @@ void drawGround() {
   for (int z = BS/2; z < map.height*BS; z+= BS) {
     line(0, y, z, map.height*BS, y, z);
   }
+  
+  pushMatrix();
+  translate(map.width*BS/2, 0, map.width*BS/2);
+  fill(skyColor);
+  stroke(skyColor);
+  box(map.width*BS*1.1);
+  popMatrix();
 }//------------------------------------------------------------------------------------------------------------------
 
 void bulletStuff() {
@@ -182,15 +198,17 @@ void bulletStuff() {
     Bullet tempBullet = bulletList.get(i);
     tempBullet.show();
     tempBullet.act();
-    if (tempBullet.bulletLifeTimer < 0) bulletList.remove(i);
+    if (tempBullet.bulletLifeTimer < 0) {
+      bulletList.remove(i);
+    }
   }
 }//----------------------------------------------------------------------------------------------------------------
 
 void fireworkStuff() {
-  fsTimer--;
-  if (fsTimer < 0) {
+  fireworkSpwanTimer--;
+  if (fireworkSpwanTimer < 0) {
     fireworkList.add(new Firework(random(BS/2, map.width*BS), 0, random(BS/2, map.height*BS), 0, -1, 0, 25, 0));
-    fsTimer = 120;
+    fireworkSpwanTimer = 120;
   }
 
   for (int i = 0; i < fireworkList.size(); i++) {
@@ -204,6 +222,17 @@ void fireworkStuff() {
       fireworkList.remove(i);
     }
     if (tempFirework.alpha < 0) fireworkList.remove(i);
+  }
+}//----------------------------------------------------------------------------------------------------------------
+
+void snowStuff() {
+  snowList.add(new Snow(random(BS/2, map.width*BS), -500, random(BS/2, map.height*BS), random(-2, 2), 1, random(-2, 2), 2));
+  
+  for (int i = 0; i < snowList.size(); i++){
+    Snow tempSnow = snowList.get(i);
+    tempSnow.show();
+    tempSnow.act();
+    if (tempSnow.loc.y > BS) snowList.remove(i);
   }
 }//----------------------------------------------------------------------------------------------------------------
 
