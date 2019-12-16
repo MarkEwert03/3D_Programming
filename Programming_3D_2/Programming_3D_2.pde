@@ -21,6 +21,7 @@ color grey            = #808080;
 color white           = #ffffff;
 color snowColor       = #c6ddec;
 color skyColor        = #6c8393;
+color creeperColor    = #0f800f;
 
 //Textures
 PImage block, square;
@@ -35,6 +36,7 @@ float rotX = PI/4, rotY = PI/4;
 //Camera
 boolean up, down, right, left, space;
 float lx = 500, ly = 0 - BS*4, lz = 500;
+PVector cameraLoc;
 PVector directionX = new PVector(-1, 0);
 PVector directionY = new PVector(0, -1);
 PVector strafeDirection = new PVector(0, 0);
@@ -50,6 +52,12 @@ int fireworkSpwanTimer = 120;
 
 //Snow
 ArrayList<Snow> snowList;
+
+//Creeper
+ArrayList<Creeper> creeperList;
+PImage creeperBody;
+PImage creeperHead;
+int csTimer = 180;
 //--------------------------------------------------------------------------------------------
 void setup() {
   size(800, 600, P3D);
@@ -73,6 +81,12 @@ void setup() {
 
   //Snow
   snowList = new ArrayList<Snow>();
+
+  //Creeper
+  creeperList = new ArrayList<Creeper>();
+  creeperBody = loadImage("Creeper Body.png");
+  creeperHead = loadImage("Creeper Head.png");
+
 }//----------------------------------------------------------------------------------------------------------------
 
 void draw() {
@@ -81,6 +95,7 @@ void draw() {
   colorMode(HSB);
 
   camera(lx, directionY.x+ly, lz, directionX.x+lx, directionY.y+ly, directionX.y+lz, 0, 1, 0);
+  cameraLoc = new PVector(lx, ly, lz);
   //camera(locX, locY, locZ, dirX, dirY, dirZ, tiltX, tiltY, tiltZ)
 
   //Moves camera with mouse
@@ -120,185 +135,11 @@ void draw() {
   drawGround();
   popMatrix();
 
-  bulletStuff();
+  //bulletStuff();
   fireworkStuff();
-  snowStuff();
+  //snowStuff();
+  creeperStuff();
 }//----------------------------------------------------------------------------------------------------------------
-
-void drawMap() {
-  //Texture Box
-  int mapX = 0, mapY = 0;
-  int worldX = BS, worldY = BS/2, worldZ = BS;
-  //0. Looking through all the pixels in the map
-  while (mapY < map.height) {
-    color pixel = map.get(mapX, mapY);
-    //1. If it's a black pixel, put a box there
-    if (pixel == black) {
-      worldX = mapX * BS;
-      worldZ = mapY * BS;
-      texturedBox(square, worldX, worldY, worldZ, BS/2);
-    }//1.
-    mapX++;
-    //1. If you get to the end of the row, move down one pixel
-    if (mapX > map.width) {
-      mapX = 0;
-      mapY++;
-    }//1.
-  }//0.
-
-  ////Color Box
-  //int mapX = 0, mapY = 0;
-  //int worldX = BS, worldY = BS/2, worldZ = BS;
-  ////0. Looking through all the pixels in the map
-  //while (mapY < pokemon.height) {
-  //  color pixel = pokemon.get(mapX, mapY);
-  //  if (pixel != white) {
-  //  worldX = mapX * BS;
-  //  worldZ = mapY * BS;
-  //  coloredBox(pixel, worldX, worldY, worldZ, BS/2);
-  //  }
-  //  mapX++;
-  //  //1. If you get to the end of the row, move down one pixel
-  //  if (pokemon.width-1 < mapX) {
-  //    mapX = 0;
-  //    mapY++;
-  //  }//1.
-  //}//0.
-}//------------------------------------------------------------------------------------------------------------------
-
-void drawGround() {
-  strokeWeight(2);
-  stroke(0);
-  int y = BS;
-  for (int x = BS/2; x < map.width*BS; x+= BS) {
-    line(x, y, 0, x, y, map.width*BS);
-  }
-  for (int z = BS/2; z < map.height*BS; z+= BS) {
-    line(0, y, z, map.height*BS, y, z);
-  }
-  
-  pushMatrix();
-  translate(map.width*BS/2, 0, map.width*BS/2);
-  fill(skyColor);
-  stroke(skyColor);
-  box(map.width*BS*1.1);
-  popMatrix();
-}//------------------------------------------------------------------------------------------------------------------
-
-void bulletStuff() {
-  bulletSpawnTimer--;
-  if (space) {
-    if (bulletSpawnTimer < 0) {
-      bulletList.add( new Bullet(lx, ly, lz, directionX.x, directionX.y));
-      bulletSpawnTimer = 30;
-    }
-  }
-
-  for (int i = 0; i < bulletList.size(); i++) {
-    Bullet tempBullet = bulletList.get(i);
-    tempBullet.show();
-    tempBullet.act();
-    if (tempBullet.bulletLifeTimer < 0) {
-      bulletList.remove(i);
-    }
-  }
-}//----------------------------------------------------------------------------------------------------------------
-
-void fireworkStuff() {
-  fireworkSpwanTimer--;
-  if (fireworkSpwanTimer < 0) {
-    fireworkList.add(new Firework(random(BS/2, map.width*BS), 0, random(BS/2, map.height*BS), 0, -1, 0, 25, 0));
-    fireworkSpwanTimer = 120;
-  }
-
-  for (int i = 0; i < fireworkList.size(); i++) {
-    Firework tempFirework = fireworkList.get(i);
-    tempFirework.show();
-    tempFirework.act();
-    if (tempFirework.s == 25 && tempFirework.loc.y <=-300) {
-      for (int j = 0; j < 100; j++) {
-        fireworkList.add(new Firework(tempFirework.loc.x, tempFirework.loc.y, tempFirework.loc.z, random(-1, 1), random(-1, 1), random(-1, 1), 4, random(0, 255)));
-      }
-      fireworkList.remove(i);
-    }
-    if (tempFirework.alpha < 0) fireworkList.remove(i);
-  }
-}//----------------------------------------------------------------------------------------------------------------
-
-void snowStuff() {
-  snowList.add(new Snow(random(BS/2, map.width*BS), -500, random(BS/2, map.height*BS), random(-2, 2), 1, random(-2, 2), 2));
-  
-  for (int i = 0; i < snowList.size(); i++){
-    Snow tempSnow = snowList.get(i);
-    tempSnow.show();
-    tempSnow.act();
-    if (tempSnow.loc.y > BS) snowList.remove(i);
-  }
-}//----------------------------------------------------------------------------------------------------------------
-
-void texturedBox(PImage _tex, float _x, float _y, float _z, int _scale) { 
-  pushMatrix();
-  translate(_x, _y, _z);
-  scale(_scale);
-
-  beginShape(QUADS);
-  texture(_tex);
-  faces();
-  endShape();
-
-  popMatrix();
-}//----------------------------------------------------------------------------------------------------------------
-
-void coloredBox(color _c, float _x, float _y, float _z, int _scale) { 
-  pushMatrix();
-  translate(_x, _y, _z);
-  scale(_scale);
-
-  beginShape(QUADS);
-  fill(_c);
-  faces();
-  endShape();
-
-  popMatrix();
-}//----------------------------------------------------------------------------------------------------------------
-
-void faces() {
-  // +Z Front Face
-  vertex(-1, -1, 1, 0, 0);  
-  vertex( 1, -1, 1, 1, 0);
-  vertex( 1, 1, 1, 1, 1);
-  vertex(-1, 1, 1, 0, 1);
-
-  // -Z Back Face
-  vertex(-1, -1, -1, 1, 0); //Flip X (1 --> 0, and 0 --> 1)
-  vertex( 1, -1, -1, 0, 0); //Flip X (1 --> 0, and 0 --> 1)
-  vertex( 1, 1, -1, 0, 1); //Flip X (1 --> 0, and 0 --> 1)
-  vertex(-1, 1, -1, 1, 1); //Flip X (1 --> 0, and 0 --> 1)
-
-  // +X Right Face
-  vertex( 1, -1, 1, 0, 0);
-  vertex( 1, -1, -1, 1, 0);
-  vertex( 1, 1, -1, 1, 1);
-  vertex( 1, 1, 1, 0, 1);
-
-  // -X Left Face
-  vertex(-1, -1, 1, 1, 0); //Flip X (1 --> 0, and 0 --> 1)
-  vertex(-1, -1, -1, 0, 0); //Flip X (1 --> 0, and 0 --> 1)
-  vertex(-1, 1, -1, 0, 1); //Flip X (1 --> 0, and 0 --> 1)
-  vertex(-1, 1, 1, 1, 1); //Flip X (1 --> 0, and 0 --> 1)
-
-  // -Y Top Face
-  vertex(-1, -1, -1, 0, 0);
-  vertex( 1, -1, -1, 1, 0);
-  vertex( 1, -1, 1, 1, 1);
-  vertex(-1, -1, 1, 0, 1);
-
-  // +Y Bottom Face
-  vertex(-1, 1, 1, 0, 0);
-  vertex( 1, 1, 1, 1, 0);
-  vertex( 1, 1, -1, 1, 1);
-  vertex(-1, 1, -1, 0, 1);
-}//------------------------------------------------------------------------------------------------------------
 
 void keyPressed() {
   if (key == 'w' || keyCode == UP)    up    = true;

@@ -17,6 +17,7 @@ class Firework {
     translate(loc.x, loc.y, loc.z);
     if (s == 25) fill(pink);
     else if (s == 4) fill(color(hue, 191, 255), alpha);
+    else fill(color(hue, 191, 255), alpha);
     noStroke();
     sphere(s);
     popMatrix();
@@ -26,6 +27,6 @@ class Firework {
     if (s == 4) alpha-= 2;
     loc.add(vel);
     vel.y += 0.1;
-    vel.setMag(5);
+    vel.setMag(4);
   }
 }//----------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,25 +1,25 @@
-class Snow {
+class Creeper {
   PVector loc = new PVector(0, 0, 0);
-  PVector vel = new PVector(0, 0, 0);
-  float s;
+  int s;
 
-  Snow(float _x, float _y, float _z, float _vx, float _vy, float _vz, int _s) {
+  Creeper(float _x, float _y, float _z, int _s) {
     loc.set(_x, _y, _z);
-    vel.set(_vx, _vy, _vz);
     s = _s;
   }//-----------------------------------------------------------------------------------------
 
   void show() {
-    pushMatrix();
-    translate(loc.x, loc.y, loc.z);
     noStroke();
-    fill(snowColor);
-    sphere(s);
-    popMatrix();
+    fill(creeperColor);
+
+    texturedBox(creeperHead, loc.x, loc.y-4*s, loc.z, int(s*1.25));
+    texturedBox(creeperBody, loc.x, loc.y-2*s, loc.z, s);
+    texturedBox(creeperBody, loc.x, loc.y, loc.z, s);
   }//-----------------------------------------------------------------------------------------
 
   void act() {
+    PVector vel = new PVector(lx-loc.x, 0, lz-loc.z);
+    vel.setMag(1);
     loc.add(vel);
-    vel.setMag(5);
+
   }//-----------------------------------------------------------------------------------------
 }
