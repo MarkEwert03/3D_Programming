@@ -20,7 +20,7 @@ color black           = #000000;
 color grey            = #808080;
 color white           = #ffffff;
 color snowColor       = #c6ddec;
-color skyColor        = #6c8393;
+color skyColor        = #cc66ff;
 color creeperColor    = #0f800f;
 
 //Textures
@@ -135,9 +135,9 @@ void draw() {
   drawGround();
   popMatrix();
 
-  //bulletStuff();
+  bulletStuff();
   fireworkStuff();
-  //snowStuff();
+  snowStuff();
   creeperStuff();
 }//----------------------------------------------------------------------------------------------------------------
 

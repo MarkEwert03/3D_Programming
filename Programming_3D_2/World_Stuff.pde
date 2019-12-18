@@ -41,7 +41,7 @@ void drawMap() {
 
 void drawGround() {
   strokeWeight(2);
-  stroke(0);
+  stroke(red);
   int y = BS;
   for (int x = BS/2; x < map.width*BS; x+= BS) {
     line(x, y, 0, x, y, map.width*BS);
@@ -54,7 +54,7 @@ void drawGround() {
   translate(map.width*BS/2, 0, map.width*BS/2);
   fill(skyColor);
   stroke(skyColor);
-  box(map.width*BS*1.1);
+  box(map.width*BS);
   popMatrix();
 }//------------------------------------------------------------------------------------------------------------------
 
